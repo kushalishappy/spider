@@ -20,33 +20,74 @@ function launchDashboard() {
     setTimeout(initializeMap, 100);
 }
 
+/* =========================================================
+   MAP
+========================================================= */
 function initializeMap() {
-    if (!document.getElementById("oceanMap") || oceanMap !== null) return;
+    const mapElement = document.getElementById("oceanMap");
+    if (!mapElement) { console.error("ORCA: oceanMap element not found."); return; }
+    if (typeof L === "undefined") { console.error("ORCA: Leaflet not loaded."); return; }
+    
+    if (oceanMap !== null) {
+        setTimeout(() => { oceanMap.invalidateSize(true); }, 200);
+        return;
+    }
 
-    oceanMap = L.map("oceanMap", { zoomControl: true }).setView([15.49, 73.82], 6);
+    /* Create map */
+    oceanMap = L.map("oceanMap", { zoomControl: true, attributionControl: true }).setView([15.49, 73.82], 6);
 
-    // Light Map that bypasses API Blocks
-    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", 
-        { maxZoom: 16, attribution: "&copy; Esri" }
-    ).addTo(oceanMap);
+    /* Base Map - Esri Light */
+    const osmLayer = L.tileLayer(
+        "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+        { maxZoom: 16, attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ" }
+    );
+    osmLayer.addTo(oceanMap);
 
-    // Click to Scan Logic
+    /* DYNAMIC MAP INTERACTIVITY */
     oceanMap.on('click', function(e) {
-        const lat = e.latlng.lat; const lon = e.latlng.lng;
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
 
-        if (stationMarker !== null) oceanMap.removeLayer(stationMarker);
+        // Remove old interactive pin
+        if (stationMarker !== null) {
+            oceanMap.removeLayer(stationMarker);
+        }
 
+        // Drop new pin
         stationMarker = L.circleMarker([lat, lon], {
-            radius: 9, color: "#ffffff", weight: 3, fillColor: "#008b68", fillOpacity: 1
-        }).addTo(oceanMap).bindPopup(`<b>Target</b><br>${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E<br><small>Scanning...</small>`).openPopup();
+            radius: 9, 
+            color: "#ffffff", 
+            weight: 3, 
+            fillColor: "#008b68", 
+            fillOpacity: 1
+        }).addTo(oceanMap);
+        
+        stationMarker.bindPopup(`
+            <div style="font-family:Inter,sans-serif">
+                <strong>Selected Target</strong><br>
+                ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E<br>
+                <small>Scanning sector...</small>
+            </div>
+        `).openPopup();
 
-        DEFAULT_BBOX = { lat_min: lat - 2, lat_max: lat + 2, lon_min: lon - 2, lon_max: lon + 2 };
+        // Update backend coordinates
+        DEFAULT_BBOX.lat_min = lat - 2.0;
+        DEFAULT_BBOX.lat_max = lat + 2.0;
+        DEFAULT_BBOX.lon_min = lon - 2.0;
+        DEFAULT_BBOX.lon_max = lon + 2.0;
 
+        // Trigger AI analysis
         const queryInput = document.getElementById("queryInput");
-        if (queryInput) queryInput.value = `Analyze marine conditions at ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
+        if (queryInput) {
+            queryInput.value = `Analyze marine conditions at ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
+        }
         
         runAnalysis();
     });
+
+    /* Map Resize */
+    setTimeout(() => { oceanMap.invalidateSize(true); }, 500);
+}
 
     setTimeout(() => { oceanMap.invalidateSize(true); }, 500);
 }
