@@ -1,0 +1,15 @@
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# NetCDF and Heavy Data Files (Member 2 Data)
+data/*.nc
+*.nc
+
+# Environment Variables / API Keys
+.env
