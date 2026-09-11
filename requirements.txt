@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+langgraph
+xarray
+numpy
+netCDF4
+python-dotenv
+openai
+pydantic
