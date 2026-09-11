@@ -139,11 +139,11 @@ function initializeMap() {
        BASE MAP
        ===================================================== */
 
-    const osmLayer = L.tileLayer(
-    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+  const osmLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
     {
-        maxZoom: 19,
-        attribution: "&copy; CartoDB"
+        maxZoom: 16,
+        attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ"
     }
 );
 
