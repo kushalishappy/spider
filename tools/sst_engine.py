@@ -5,11 +5,15 @@ import numpy as np
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "regional_oisst.nc")
 
 def get_sst_timeseries(min_lat: float, max_lat: float, min_lon: float, max_lon: float) -> dict:
+    """
+    Dynamically slices the NOAA OISST dataset based on coordinates 
+    passed from the frontend map selection.
+    """
     if not os.path.exists(DATA_PATH):
         return {"status": "error", "message": f"Dataset missing at {DATA_PATH}"}
 
     try:
-        # 1. Coordinate Normalization & Clamping
+        # 1. Normalize & Clamp to regional boundaries (India region: Lat 4-25, Lon 65-95)
         lat_bottom, lat_top = sorted([float(min_lat), float(max_lat)])
         lon_left, lon_right = sorted([float(min_lon), float(max_lon)])
 
@@ -18,7 +22,7 @@ def get_sst_timeseries(min_lat: float, max_lat: float, min_lon: float, max_lon: 
         lon_left = max(lon_left, 65.0)
         lon_right = min(lon_right, 95.0)
 
-        # 2. Dataset Slicing
+        # 2. Dataset Slicing for the requested user region
         ds = xr.open_dataset(DATA_PATH)
         sliced = ds.sel(
             latitude=slice(lat_bottom, lat_top),
@@ -28,7 +32,7 @@ def get_sst_timeseries(min_lat: float, max_lat: float, min_lon: float, max_lon: 
         if sliced['sst'].size == 0:
             return {"status": "error", "message": "Selected bounding box returned no data cells."}
 
-        # 3. Safe Statistical Calculations (NaN Handling)
+        # 3. Compute Metrics with NaN Handling
         sst_mean = float(np.nanmean(sliced['sst'].values))
         sst_min = float(np.nanmin(sliced['sst'].values))
         sst_max = float(np.nanmax(sliced['sst'].values))
@@ -38,7 +42,6 @@ def get_sst_timeseries(min_lat: float, max_lat: float, min_lon: float, max_lon: 
         else:
             anom_mean = round(sst_mean - 28.0, 2)
 
-        # 4. Degree Heating Weeks (DHW) Calculation
         daily_spatial_mean = sliced['sst'].mean(dim=['latitude', 'longitude'], skipna=True)
         hot_spots = daily_spatial_mean - 29.5
         valid_hot_spots = xr.where(hot_spots >= 1.0, hot_spots, 0.0)
@@ -61,7 +64,7 @@ def get_sst_timeseries(min_lat: float, max_lat: float, min_lon: float, max_lon: 
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# Execution block for local testing
 if __name__ == "__main__":
-    print("--- FINAL INTEGRATION TEST ---")
-    print(get_sst_timeseries(min_lat=8.0, max_lat=15.0, min_lon=70.0, max_lon=78.0))
+    # Test with custom coordinates mimicking a user selection on the web map
+    print("--- TESTING CUSTOM WEB MAP REGION ---")
+    print(get_sst_timeseries(min_lat=10.0, max_lat=20.0, min_lon=72.0, max_lon=82.0))
