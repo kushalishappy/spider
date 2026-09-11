@@ -140,13 +140,12 @@ function initializeMap() {
        ===================================================== */
 
     const osmLayer = L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            maxZoom: 18,
-            attribution:
-                "&copy; OpenStreetMap contributors"
-        }
-    );
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+    {
+        maxZoom: 19,
+        attribution: "&copy; CartoDB"
+    }
+);
 
     osmLayer.addTo(oceanMap);
 
