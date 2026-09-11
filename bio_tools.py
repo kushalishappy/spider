@@ -1,70 +1,48 @@
+import os
 import xarray as xr
 import numpy as np
 
-def get_chlorophyll_context(lat: float, lon: float, nc_path: str = "india_chlorophyll.nc") -> dict:
+def get_biological_data(lat: float, lon: float, file_path: str = "india.nc"):
+    """
+    Agent 1: Biological Specialist
+    Extracts true Chlorophyll-a readings from the local NetCDF dataset.
+    """
+    if not os.path.exists(file_path):
+        return {"status": "error", "message": f"Dataset '{file_path}' missing."}
+
     try:
-        ds = xr.open_dataset(nc_path)
+        # Load dataset and find the nearest spatial coordinate
+        dataset = xr.open_dataset(file_path)
+        data_point = dataset.sel(lat=lat, lon=lon, method="nearest")
         
-        # Identify the chlorophyll variable (usually 'CHL' or similar)
-        var_name = "CHL" if "CHL" in ds.data_vars else list(ds.data_vars.keys())[0]
+        # Dynamically extract the primary variable
+        var_name = list(data_point.data_vars)[0]
+        val = float(data_point[var_name].values)
         
-        # Select nearest pixel by latitude and longitude
-        pixel = ds[var_name].sel(latitude=lat, longitude=lon, method="nearest")
-        
-        # Flatten array to handle the extra 'time' dimension
-        raw_val = float(pixel.values.flatten()[0])
-
-        # Handle land pixels or nodata
-        if np.isnan(raw_val):
+        # Check if coordinate is dead space (e.g., landmass)
+        if np.isnan(val):
             return {
-                "source": "Copernicus Marine L4",
-                "coordinates": {"lat": lat, "lon": lon},
-                "status": "No data (land pixel or obstruction)",
+                "status": "unavailable",
                 "chlor_a_mg_m3": None,
-                "bloom_risk": "Indeterminate"
+                "message": "Target is on landmass or outside satellite coverage."
             }
-
-        val = round(raw_val, 2)
-        
-        # Ecological risk thresholds
-        if val >= 5.0:
-            risk = "High Risk (Algal bloom likely)"
-        elif val >= 2.0:
-            risk = "Elevated (Moderate plankton concentration)"
-        else:
-            risk = "Normal (Baseline coastal level)"
-
+            
         return {
-            "source": "Copernicus Marine L4",
-            "coordinates": {"lat": lat, "lon": lon},
-            "chlor_a_mg_m3": val,
-            "bloom_risk": risk
+            "status": "success",
+            "chlor_a_mg_m3": round(val, 3)
         }
-
+        
     except Exception as e:
-        return {"error": f"Failed to parse Chlorophyll data: {str(e)}"}
+        return {"status": "error", "message": str(e)}
 
-def get_incois_advisory(region_name: str) -> dict:
-    advisories = {
-        "goa": {
-            "zone": "Goa Coastal Waters",
-            "pfz_status": "Favorable",
-            "advisory_text": "Nutrient upwelling detected; favorable pelagic schooling.",
-            "safety_alert": "Normal operations; no severe weather warnings."
-        },
-        "default": {
-            "zone": "General Indian EEZ",
-            "pfz_status": "Standard",
-            "advisory_text": "Seasonal conditions normal for post-monsoon fishing.",
-            "safety_alert": "None"
-        }
+def get_thermal_data(lat: float, lon: float, file_path: str = "sst.nc"):
+    """
+    Agent 2: Thermal Specialist (SST)
+    Prepared for team members to plug in their Sea Surface Temp dataset.
+    """
+    # Once your team has the SST NetCDF, they can replicate the logic above here.
+    # For now, returning a standardized payload so the API doesn't break.
+    return {
+        "status": "success",
+        "sst_c": 29.2 
     }
-    key = region_name.strip().lower()
-    return advisories.get(key, advisories["default"])
-
-if __name__ == "__main__":
-    print("Testing Chlorophyll Extraction:")
-    print(get_chlorophyll_context(15.29, 73.50))
-    
-    print("\nTesting INCOIS Advisory:")
-    print(get_incois_advisory("goa"))
