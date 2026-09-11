@@ -80,7 +80,7 @@ function scrollToAsk() {
     if (section) {
         section.scrollIntoView({
             behavior: "smooth"
-        });
+        });/**
     }
 }
 
@@ -98,7 +98,7 @@ function useLandingSuggestion(query) {
 
 /* =========================================================
    MAP
-   ========================================================= */
+   ========================================================= *
 
 function initializeMap() {
 
@@ -123,7 +123,7 @@ function initializeMap() {
         return;
     }
 
-
+**/
     /* Create map */
 
     oceanMap = L.map("oceanMap", {
@@ -148,6 +148,49 @@ function initializeMap() {
 );
 
     osmLayer.addTo(oceanMap);
+       /* =====================================================
+       DYNAMIC MAP INTERACTIVITY
+    ===================================================== */
+    oceanMap.on('click', function(e) {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+
+        // 1. Remove the old marker if it exists
+        if (stationMarker !== null) {
+            oceanMap.removeLayer(stationMarker);
+        }
+
+        // 2. Drop a new interactive pin at the clicked location
+        stationMarker = L.circleMarker([lat, lon], {
+            radius: 9, 
+            color: "#ffffff", 
+            weight: 3, 
+            fillColor: "#008b68", 
+            fillOpacity: 1
+        }).addTo(oceanMap);
+        
+        stationMarker.bindPopup(`
+            <div style="font-family:Inter,sans-serif">
+                <strong>Selected Target</strong><br>
+                ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E<br>
+                <small>Scanning sector...</small>
+            </div>
+        `).openPopup();
+
+        // 3. Update the global bounding box so the backend knows where to look
+        DEFAULT_BBOX.lat_min = lat - 2.0;
+        DEFAULT_BBOX.lat_max = lat + 2.0;
+        DEFAULT_BBOX.lon_min = lon - 2.0;
+        DEFAULT_BBOX.lon_max = lon + 2.0;
+
+        // 4. Update the chat bar and automatically trigger the AI analysis
+        const queryInput = document.getElementById("queryInput");
+        if (queryInput) {
+            queryInput.value = `Analyze marine conditions at ${lat.toFixed(2)}°N, ${lon.toFixed(2)}°E`;
+        }
+        
+        runAnalysis();
+    });
 
 
     /* =====================================================
