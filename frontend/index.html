@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ORCA — Ocean Reasoning & Coastal Advisor</title>
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+</head>
+
+<body>
+
+<!-- =========================================================
+     LANDING PAGE
+========================================================= -->
+
+<section id="landingPage" class="landing-page">
+
+    <nav class="landing-nav">
+
+        <div class="brand">
+            <div class="brand-mark">
+                ◉
+            </div>
+
+            <div>
+                <div class="brand-name">ORCA</div>
+                <div class="brand-subtitle">
+                    Ocean Reasoning & Coastal Advisor
+                </div>
+            </div>
+        </div>
+
+        <button
+            class="nav-launch"
+            onclick="launchDashboard()"
+        >
+            Launch ORCA →
+        </button>
+
+    </nav>
+
+
+    <main class="hero">
+
+        <div class="hero-copy">
+
+            <div class="eyebrow">
+                <span class="eyebrow-dot"></span>
+                ISRO • OCEAN INTELLIGENCE
+            </div>
+
+            <h1>
+                The ocean is complex.<br>
+                <span>ORCA</span> makes it<br>
+                understandable.
+            </h1>
+
+            <p class="hero-description">
+                An intelligent interface for exploring ocean
+                conditions through specialized AI agents and
+                real marine data.
+            </p>
+
+            <div class="hero-buttons">
+
+                <button
+                    class="primary-button"
+                    onclick="launchDashboard()"
+                >
+                    Launch ORCA →
+                </button>
+
+                <button
+                    class="secondary-button"
+                    onclick="scrollToAsk()"
+                >
+                    Explore ORCA ⊙
+                </button>
+
+            </div>
+
+            <div class="hero-stats">
+
+                <div>
+                    <strong>24ms</strong>
+                    <span>TELEMETRY LATENCY</span>
+                </div>
+
+                <div>
+                    <strong>0.05° EPSG:4326</strong>
+                    <span>PRECISION GRID</span>
+                </div>
+
+                <div>
+                    <strong>Oceansat-3 / INCOIS</strong>
+                    <span>SENSOR CONSTELLATION</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-visual">
+
+            <div class="ocean-card">
+
+                <div class="ocean-card-header">
+
+                    <div>
+                        <span class="live-dot"></span>
+                        Arabian Sea & Bay of Bengal Synoptic
+                    </div>
+
+                    <span class="monsoon">
+                        SW-Monsoon Drift ●
+                    </span>
+
+                </div>
+
+                <div class="fake-ocean-map">
+
+                    <div class="coordinate-top">
+                        18.00°N / 70.00°E
+                    </div>
+
+                    <div class="ocean-wave wave-one"></div>
+                    <div class="ocean-wave wave-two"></div>
+                    <div class="ocean-wave wave-three"></div>
+
+                    <div class="map-label goa-label">
+                        <span></span>
+                        Goa Observation Buoy
+                    </div>
+
+                    <div class="map-label shelf-label">
+                        <span></span>
+                        Chennai Shelf
+                    </div>
+
+                    <div class="map-label lakshadweep-label">
+                        <span></span>
+                        Lakshadweep Basin
+                    </div>
+
+                    <div class="station-card">
+
+                        <div class="station-title">
+                            <span class="live-dot"></span>
+                            Station Goa-04
+                        </div>
+
+                        <div class="station-location">
+                            15.49°N, 73.82°E
+                        </div>
+
+                        <div class="station-values">
+
+                            <div>
+                                <small>Sea Surface Temp</small>
+                                <strong>28.6°C</strong>
+                                <em>(+0.3°)</em>
+                            </div>
+
+                            <div>
+                                <small>Chlorophyll-a</small>
+                                <strong>1.18</strong>
+                                <em>mg/m³</em>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="depth-bar">
+                        <span>Depth: Epipelagic (0m)</span>
+                        <div>
+                            <i></i>
+                        </div>
+                        <span>Abyssal (4000m+)</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- ASK ORCA -->
+
+    <section
+        id="askSection"
+        class="ask-section"
+    >
+
+        <div class="section-eyebrow">
+            <span>◉</span>
+            AUTONOMOUS SCIENTIFIC REASONING
+        </div>
+
+        <h2>Ask ORCA</h2>
+
+        <p>
+            Explore ocean conditions using natural language.
+        </p>
+
+
+        <div class="demo-chat-card">
+
+            <div class="demo-question">
+                What is the SST and chlorophyll condition near Goa?
+                <span>♙</span>
+            </div>
+
+
+            <div class="trace-header">
+                <span>
+                    ● MULTI-AGENT SYNTHESIS TRACE
+                </span>
+
+                <strong>
+                    4 specialized agents deployed
+                </strong>
+            </div>
+
+
+            <div class="demo-agents">
+
+                <div class="demo-agent">
+                    <span class="check">✓</span>
+                    <div>
+                        <strong>Router Agent</strong>
+                        <small>Query decomposed</small>
+                    </div>
+                </div>
+
+                <div class="demo-agent">
+                    <span class="check">✓</span>
+                    <div>
+                        <strong>SST Specialist</strong>
+                        <small>NOAA OISST</small>
+                    </div>
+                </div>
+
+                <div class="demo-agent">
+                    <span class="check">✓</span>
+                    <div>
+                        <strong>Chlorophyll Specialist</strong>
+                        <small>Copernicus Marine</small>
+                    </div>
+                </div>
+
+                <div class="demo-agent">
+                    <span class="check">✓</span>
+                    <div>
+                        <strong>Reasoning Agent</strong>
+                        <small>Multi-source synthesis</small>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="demo-answer">
+
+                <div class="answer-icon">
+                    ≋
+                </div>
+
+                <div>
+
+                    <p>
+                        Current coastal observations for Goa show
+                        sea surface temperature within seasonal
+                        nominal bounds with moderate chlorophyll
+                        accumulation along shelf upwelling zones.
+                    </p>
+
+                    <div class="answer-meta">
+                        Confidence: Evidence-based
+                        &nbsp; • &nbsp;
+                        Source: NOAA OISST / Copernicus Marine
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="view-dashboard-button"
+                onclick="launchDashboard()"
+            >
+                View Ocean Dashboard ↗
+            </button>
+
+        </div>
+
+
+        <div class="ask-input-card">
+
+            <textarea
+                id="landingQuery"
+                placeholder="Ask ORCA about the ocean..."
+            ></textarea>
+
+            <div class="input-toolbar">
+
+                <span>♧</span>
+                <span>⌖</span>
+                <span>⌘</span>
+
+                <span class="epsg">
+                    EPSG:4326 Ready
+                </span>
+
+                <button onclick="launchDashboardWithQuery()">
+                    Analyze →
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="suggestions">
+
+            <span>Suggested inquiries:</span>
+
+            <button onclick="useLandingSuggestion('What is the SST near Chennai?')">
+                What is the SST near Chennai?
+            </button>
+
+            <button onclick="useLandingSuggestion('Show chlorophyll trends near Goa.')">
+                Show chlorophyll trends near Goa.
+            </button>
+
+            <button onclick="useLandingSuggestion('How are ocean conditions changing?')">
+                How are ocean conditions changing?
+            </button>
+
+            <button onclick="useLandingSuggestion('Analyze this coastal region.')">
+                Analyze this coastal region.
+            </button>
+
+        </div>
+
+    </section>
+
+</section>
+
+
+<!-- =========================================================
+     DASHBOARD
+========================================================= -->
+
+<section
+    id="dashboardPage"
+    class="dashboard-page hidden"
+>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+
+            <div class="brand-mark">
+                ◉
+            </div>
+
+            <div>
+                <strong>ORCA</strong>
+                <span>Command Deck</span>
+            </div>
+
+        </div>
+
+
+        <div class="live-grid">
+            <span class="live-dot"></span>
+            Live Grid | <strong>24ms</strong>
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <button class="active">
+                <span>◎</span>
+                Mission Control
+            </button>
+
+            <button>
+                <span>♧</span>
+                Agent Swarm
+            </button>
+
+            <button>
+                <span>≋</span>
+                Bathymetry & GIS
+            </button>
+
+            <button>
+                <span>▣</span>
+                Telemetry Streams
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <span>Satellite Node 04</span>
+
+            <strong>
+                NOMINAL
+            </strong>
+
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN DASHBOARD -->
+
+    <main class="dashboard-main">
+
+        <!-- TOP BAR -->
+
+        <header class="dashboard-header">
+
+            <div class="header-title">
+                Atmospheric & Oceanic Operations
+            </div>
+
+            <div class="header-actions">
+
+                <span class="theme-icon">
+                    ☼
+                </span>
+
+                <button class="profile-button">
+                    ♙
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- LOCATION BAR -->
+
+        <div class="sector-bar">
+
+            <div class="sector-information">
+
+                <span class="active-sector">
+                    ● ACTIVE SECTOR
+                </span>
+
+                <strong>
+                    Bay of Bengal (BOB-04) & Arabian Sea (Goa-02)
+                </strong>
+
+                <span class="separator">•</span>
+
+                <span class="coordinate">
+                    ⌖ 15.49° N, 73.82° E (Goa Offshore)
+                </span>
+
+            </div>
+
+            <div class="sector-actions">
+
+                <span class="sync-badge">
+                    ◈ INCOIS-ISRO Live Grid:
+                    <strong>21ms</strong>
+                </span>
+
+                <button>
+                    ◇ Layers
+                </button>
+
+                <button>
+                    ◷ 7D Window
+                </button>
+
+                <button
+                    class="analyze-button"
+                    onclick="runAnalysis()"
+                >
+                    ◉ Analyze Region
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- DASHBOARD CONTENT -->
+
+        <div class="dashboard-content">
+
+
+            <!-- METRIC CARDS -->
+
+            <div class="metric-grid">
+
+                <div class="metric-card">
+
+                    <div class="metric-title">
+                        SEA SURFACE TEMP
+                        <span>♨</span>
+                    </div>
+
+                    <div class="metric-value">
+                        <span id="sstValue">28.81</span>
+                        <small>°C</small>
+                        <em id="sstDelta">Stable</em>
+                    </div>
+
+                    <div class="metric-subtitle">
+                        Regional OISST mean
+                    </div>
+
+                    <div class="metric-progress">
+                        <div id="sstProgress"></div>
+                    </div>
+
+                    <div class="metric-footer">
+                        NOAA OISST
+                        <span id="sstStatus">READY</span>
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-title">
+                        CHLOROPHYLL-A BIO-MASS
+                        <span>♧</span>
+                    </div>
+
+                    <div class="metric-value">
+                        <span id="chlValue">1.34</span>
+                        <small>mg/m³</small>
+                        <em id="chlStatus">→ Stable</em>
+                    </div>
+
+                    <div class="metric-subtitle">
+                        Regional chlorophyll screening
+                    </div>
+
+                    <div class="metric-progress chlorophyll">
+                        <div id="chlProgress"></div>
+                    </div>
+
+                    <div class="metric-footer">
+                        Copernicus Marine
+                        <span>NOMINAL</span>
+                    </div>
+
+                </div>
+
+
+                <div class="metric-card">
+
+                    <div class="metric-title">
+                        SENSOR LINEAGE & TRUST
+                        <span>♧</span>
+                    </div>
+
+                    <div class="sensor-value">
+                        Oceansat-3
+                        <em>99.4%</em>
+                    </div>
+
+                    <div class="metric-subtitle">
+                        NOAA OISST + Copernicus Marine
+                    </div>
+
+                    <div class="metric-progress">
+                        <div style="width:94%"></div>
+                    </div>
+
+                    <div class="metric-footer">
+                        Data lineage
+                        <span>VERIFIED</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MAP + AGENT TRACE -->
+
+            <div class="middle-grid">
+
+
+                <!-- MAP -->
+
+                <section class="panel map-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h3>
+                                ◉ Interactive Oceanic Satellite Viewport
+                            </h3>
+
+                            <span class="sector-tag">
+                                Arabian Sea Sector
+                            </span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="map-tabs">
+
+                        <button class="active">
+                            SST Thermal
+                        </button>
+
+                        <button>
+                            Chlorophyll-a
+                        </button>
+
+                        <button>
+                            Currents
+                        </button>
+
+                        <button>
+                            Buoy Array
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="oceanMap"
+                        class="ocean-map"
+                    ></div>
+
+
+                    <div class="map-overlay-card">
+
+                        <div class="overlay-title">
+                            <span class="live-dot"></span>
+                            Goa Offshore Node
+                        </div>
+
+                        <div class="overlay-coordinate">
+                            15.49°N, 73.82°E
+                        </div>
+
+                        <div class="overlay-grid">
+
+                            <div>
+                                <small>Thermal Field</small>
+                                <strong id="mapSst">
+                                    28.81°C
+                                </strong>
+                            </div>
+
+                            <div>
+                                <small>Chlorophyll-a</small>
+                                <strong id="mapChl">
+                                    1.34 mg/m³
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="map-depth">
+
+                        <span>Depth: 0m</span>
+
+                        <div class="depth-gradient"></div>
+
+                        <span>-200m+</span>
+
+                    </div>
+
+                </section>
+
+
+                <!-- AGENT TRACE -->
+
+                <section class="panel trace-panel">
+
+                    <div class="panel-header">
+
+                        <h3>
+                            ♧ Live Agent Thought Trace
+                        </h3>
+
+                        <span class="agents-active">
+                            ● <span id="agentCount">0</span> Agents Active
+                        </span>
+
+                    </div>
+
+
+                    <div class="mission-prompt">
+
+                        <strong>
+                            ⌁ Mission Intent / Prompt:
+                        </strong>
+
+                        <p id="tracePrompt">
+                            Analyze current marine conditions
+                            for the selected region.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="agentTrace"
+                        class="agent-trace"
+                    >
+
+                        <div class="trace-empty">
+                            Run an analysis to see specialist
+                            agents working.
+                        </div>
+
+                    </div>
+
+
+                    <div class="query-box">
+
+                        <textarea
+                            id="queryInput"
+                            placeholder="Prompt ORCA agents..."
+                        ></textarea>
+
+                        <button onclick="runAnalysis()">
+                            Query →
+                        </button>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+
+            <!-- CHART + ADVISORY -->
+
+            <div class="bottom-grid">
+
+
+                <!-- CHART -->
+
+                <section class="panel chart-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h3>
+                                Dual-Axis Ocean Conditions Matrix
+                            </h3>
+
+                            <p>
+                                Sea Surface Temperature (°C) &
+                                Chlorophyll-a (mg/m³) — 7-Day Trend
+                            </p>
+
+                        </div>
+
+                        <div class="chart-legend">
+
+                            <span class="sst-legend">
+                                ━ SST (°C)
+                            </span>
+
+                            <span class="chl-legend">
+                                ━ Chlorophyll-a
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="chart-area">
+
+                        <canvas id="sstChart"></canvas>
+
+                    </div>
+
+
+                    <div class="chart-footer">
+
+                        <span>
+                            Cross-source regional analysis
+                        </span>
+
+                        <strong id="trendSummary">
+                            Waiting for analysis
+                        </strong>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ADVISORY -->
+
+                <section class="panel advisory-panel">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <h3>
+                                ◉ ORCA Operational Assessment
+                            </h3>
+
+                            <p>
+                                Automated Synthesis Engine
+                            </p>
+                        </div>
+
+                        <span class="advisory-badge">
+                            ADVISORY ACTIVE
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="advisoryContent"
+                        class="advisory-content"
+                    >
+
+                        <div class="advisory-placeholder">
+
+                            <div class="placeholder-icon">
+                                ◉
+                            </div>
+
+                            <h4>
+                                Ready for analysis
+                            </h4>
+
+                            <p>
+                                Ask ORCA a question or select
+                                Analyze Region to retrieve
+                                evidence from the specialist agents.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="source-footer">
+
+                        <span>Sources:</span>
+
+                        <span class="source-chip">
+                            NOAA OISST
+                        </span>
+
+                        <span class="source-chip">
+                            Copernicus Marine
+                        </span>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</section>
+
+
+<div
+    id="loadingOverlay"
+    class="loading-overlay hidden"
+>
+
+    <div class="loader-card">
+
+        <div class="loader-spinner"></div>
+
+        <strong>
+            ORCA is consulting specialist agents
+        </strong>
+
+        <span>
+            Routing marine evidence...
+        </span>
+
+    </div>
+
+</div>
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+></script>
+
+<script src="app.js"></script>
+
+</body>
+</html>
