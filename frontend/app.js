@@ -17,9 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
 // Replace your existing launchDashboard with this safe version
 function launchDashboard() {
     const landing = document.getElementById("landingPage");
-    const dashboard = document.getElementById("dashboardLayout");
+    const dashboard = document.getElementById("dashboardPage"); // <-- FIXED ID!
     
-    // Safety check: only change style if the elements actually exist in your HTML
     if (landing) landing.style.display = "none";
     if (dashboard) dashboard.style.display = "flex";
     
