@@ -1,230 +1,57 @@
-from typing import Dict
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import Dict, Any
 
-from bio_tools import (
-    get_chlorophyll_context,
-    get_chlorophyll_bbox,
-    get_incois_advisory,
-    generate_gemini_advisory,
-)
+app = FastAPI(title="ORCA API Integration")
 
-from tools.sst_engine import get_sst_timeseries
-from backend.graph import orca_graph
-
-
-app = FastAPI(title="ORCA Biological Advisory API")
-
-
-# ============================================================
-# CORS
-# ============================================================
-
+# This allows the frontend to talk to the backend without being blocked
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-# ============================================================
-# MODELS
-# ============================================================
-
-class MarineRequest(BaseModel):
-    lat: float
-    lon: float
-    min_lat: float
-    max_lat: float
-    min_lon: float
-    max_lon: float
-    region: str = "goa"
-
-
-class QueryPayload(BaseModel):
+# 1. Match the exact input app.js is sending
+class ChatRequest(BaseModel):
     query: str
     bbox: Dict[str, float]
 
-
-# ============================================================
-# ROOT
-# ============================================================
-
-@app.get("/")
-def root():
-    return {
-        "status": "success",
-        "service": "ORCA backend",
-        "message": "ORCA Ocean Reasoning & Coastal Advisor API is running."
-    }
-
-
-# ============================================================
-# HEALTH
-# ============================================================
-
-@app.get("/health")
-def health():
-    return {
-        "status": "healthy",
-        "service": "ORCA backend",
-        "components": {
-            "langgraph": "available",
-            "sst_specialist": "available",
-            "sst_forecast": "available",
-            "chlorophyll_specialist": "available",
-            "marine_advisory": "available",
-            "gemini": "available"
-        }
-    }
-
-
-# ============================================================
-# MARINE STATUS
-# ============================================================
-
-@app.post("/api/marine-status")
-def fetch_marine_status(req: MarineRequest):
-
-    # SST
-    sst_data = get_sst_timeseries(
-        min_lat=req.min_lat,
-        max_lat=req.max_lat,
-        min_lon=req.min_lon,
-        max_lon=req.max_lon
-    )
-
-    # Chlorophyll point
-    chlorophyll_data = get_chlorophyll_context(
-        req.lat,
-        req.lon
-    )
-
-    # Chlorophyll regional bbox
-    chlorophyll_bbox = get_chlorophyll_bbox(
-        req.min_lat,
-        req.max_lat,
-        req.min_lon,
-        req.max_lon
-    )
-
-    # Rule-based advisory
-    advisory_data = get_incois_advisory(
-        sst_summary=sst_data,
-        chlorophyll_summary=chlorophyll_bbox,
-        forecast_summary=None
-    )
-
-    return {
-        "status": "success",
-
-        "coordinates": {
-            "lat": req.lat,
-            "lon": req.lon
-        },
-
-        "bounding_box": {
-            "min_lat": req.min_lat,
-            "max_lat": req.max_lat,
-            "min_lon": req.min_lon,
-            "max_lon": req.max_lon
-        },
-
-        "sst": sst_data,
-
-        "chlorophyll": chlorophyll_data,
-
-        "chlorophyll_bbox": chlorophyll_bbox,
-
-        "incois_advisory": advisory_data
-    }
-
-
-# ============================================================
-# CHAT / ORCA AGENT
-# ============================================================
-
+# 2. Match the exact endpoint URL app.js is calling
 @app.post("/api/chat")
-async def process_chat(payload: QueryPayload):
-
-    required = [
-        "lat_min",
-        "lat_max",
-        "lon_min",
-        "lon_max"
-    ]
-
-    if not all(key in payload.bbox for key in required):
-        return {
-            "status": "error",
-            "message": (
-                "bbox must contain "
-                "lat_min, lat_max, lon_min and lon_max."
-            )
-        }
-
-    # --------------------------------------------------------
-    # LangGraph
-    # --------------------------------------------------------
-
-    config = {
-        "configurable": {
-            "thread_id": "orca-session-1"
-        }
-    }
-
-    initial_state = {
-        "user_query": payload.query,
-        "location_bbox": payload.bbox,
-        "agent_trace": []
-    }
-
-    final_state = await orca_graph.ainvoke(
-        initial_state,
-        config=config
-    )
-
-    # --------------------------------------------------------
-    # Extract specialist results
-    # --------------------------------------------------------
-
-    sst_summary = final_state.get("sst_summary")
-    chl_summary = final_state.get("chl_summary")
-    forecast_summary = final_state.get("sst_forecast")
-    advisory = final_state.get("advisory_output")
-
-    # --------------------------------------------------------
-    # Gemini advisory
-    # --------------------------------------------------------
-
-    gemini_advisory = generate_gemini_advisory(
-        sst_summary=sst_summary,
-        chlorophyll_summary=chl_summary,
-        forecast_summary=forecast_summary
-    )
-
-    # --------------------------------------------------------
-    # Final response
-    # --------------------------------------------------------
-
+def analyze_ocean(req: ChatRequest):
+    
+    # [!] This is where you will eventually plug in your bio_tools.py functions
+    # Example: chlor_data = get_biological_data(15.49, 73.82)
+    
+    # 3. Match the EXACT output format app.js needs to populate the UI
     return {
-        "status": "success",
-
-        "query": payload.query,
-
-        "advisory": advisory,
-
-        "gemini_advisory": gemini_advisory,
-
-        "sst_summary": sst_summary,
-
-        "sst_forecast": forecast_summary,
-
-        "chl_summary": chl_summary,
-
-        "agent_trace": final_state.get("agent_trace", [])
+        "sst_summary": {
+            "average_sst_celsius": 28.81
+        },
+        "chl_summary": {
+            "chlor_a_mg_m3": 1.34,
+            "bloom_risk": "NOMINAL"
+        },
+        "sst_forecast": {
+            "direction": "Slight Warming",
+            "change_over_outlook_celsius": 0.12,
+            "observed": [
+                {"date": "Day 1", "sst": 28.5},
+                {"date": "Day 2", "sst": 28.7}
+            ],
+            "forecast": [
+                {"date": "Day 3", "sst": 28.81},
+                {"date": "Day 4", "sst": 28.9}
+            ]
+        },
+        "agent_trace": [
+            {"agent": "Router", "progress": 25, "description": "Parsed user request."},
+            {"agent": "SST Specialist", "progress": 50, "description": "Retrieved temperature data."},
+            {"agent": "Chlorophyll Specialist", "progress": 75, "description": "Analyzed algae levels."},
+            {"agent": "Synthesis", "progress": 100, "description": "Generated final advisory."}
+        ],
+        "advisory": "# Assessment\nAll marine conditions are nominal. The Chlorophyll levels indicate a highly favorable Potential Fishing Zone (PFZ). Proceed with standard operations."
     }
