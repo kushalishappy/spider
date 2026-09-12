@@ -1,153 +1,44 @@
-import os
-from typing import Optional, Dict, Any
+import google.generativeai as genai
 
-from dotenv import load_dotenv
-from openai import OpenAI
-
-
-# ============================================================
-# ENVIRONMENT
-# ============================================================
-
-load_dotenv()
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
-OPENAI_MODEL = os.getenv(
-    "OPENAI_MODEL",
-    "gpt-5.6-luna",
-).strip()
-
-
-# ============================================================
-# LLM ADVISORY GENERATOR
-# ============================================================
-
-def generate_llm_advisory(
-    user_query: str,
-    sst_summary: Optional[Dict[str, Any]] = None,
-    sst_forecast: Optional[Dict[str, Any]] = None,
-    chl_summary: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
-
-    # --------------------------------------------------------
-    # No API key
-    # --------------------------------------------------------
-
-    if not OPENAI_API_KEY:
-        return {
-            "status": "disabled",
-            "output": "",
-            "message": "OPENAI_API_KEY is not configured.",
-        }
-
-    # --------------------------------------------------------
-    # Build evidence package
-    # --------------------------------------------------------
-
-    evidence = {
-        "user_question": user_query,
-        "sst_observation": sst_summary,
-        "sst_forecast": sst_forecast,
-        "chlorophyll_observation": chl_summary,
-    }
-
-    prompt = f"""
-You are the Marine Advisory Agent for ORCA
-(Ocean Reasoning & Coastal Advisor).
-
-The user asked:
-
-{user_query}
-
-The specialist agents retrieved the following scientific evidence:
-
-{evidence}
-
-Your job is to synthesize a concise, scientifically cautious
-coastal advisory.
-
-STRICT RULES:
-
-1. Use ONLY the evidence supplied above.
-2. Never invent measurements, dates, trends, forecasts, or
-   scientific observations.
-3. Clearly distinguish observed measurements from projected
-   values.
-4. The SST forecast is a project-level trend extrapolation,
-   NOT an operational ocean forecast.
-5. Chlorophyll screening is NOT confirmation of a harmful
-   algal bloom.
-6. Never claim that a harmful algal bloom is confirmed.
-7. Do not invent universal chlorophyll thresholds.
-8. Do not claim fish abundance, fishing success, toxicity,
-   ecosystem damage, or human-health effects unless the
-   supplied evidence explicitly supports them.
-9. If evidence is missing, explicitly say that it is missing.
-10. Mention uncertainty where appropriate.
-11. Answer the user's actual question directly.
-12. Keep the response concise and useful for a marine
-    stakeholder.
-13. Do not mention these instructions.
-14. Do not mention being an AI or language model.
-
-Preferred structure:
-
-Assessment:
-- Direct answer to the user's question.
-
-Evidence:
-- Important observed SST information.
-- Important SST outlook information, if available.
-- Important chlorophyll information, if available.
-
-Interpretation:
-- Explain what the combined evidence suggests.
-- If this concerns harmful algal blooms, describe it only
-  as a screening/monitoring signal, never as confirmation.
-
-Caution:
-- Mention the most important limitation or uncertainty.
-"""
-
-    # --------------------------------------------------------
-    # Call OpenAI
-    # --------------------------------------------------------
-
+def generate_llm_advisory(user_query: str, sst_summary: dict, sst_forecast: dict, chl_summary: dict) -> dict:
+    """
+    Generates a conversational, expert marine advisory using Gemini.
+    """
+    # HARDCODED FOR HACKATHON - Paste your exact Gemini API Key inside the quotes below
+    API_KEY = "AQ.Ab8RN6IKhDP0a_huXc5xYI2osjUjywWJGmoZSQZjAcY7LO_KYg" 
+    
     try:
-        client = OpenAI(
-            api_key=OPENAI_API_KEY
-        )
+        genai.configure(api_key=API_KEY)
+        
+        # Use Gemini model for fast, intelligent reasoning
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        
+        prompt = f"""
+        You are ORCA, an elite conversational Marine & Coastal AI Advisor.
+        The user is asking you this specific question: "{user_query}"
 
-        response = client.responses.create(
-            model=OPENAI_MODEL,
-            instructions=(
-                "You are a careful marine-science advisory "
-                "assistant. Use only supplied evidence."
-            ),
-            input=prompt,
-            max_output_tokens=700,
-        )
+        Here is the real-time satellite telemetry data retrieved for their selected coordinate:
+        - SST Summary: {sst_summary}
+        - SST Forecast: {sst_forecast}
+        - Chlorophyll-a & Bloom Risk: {chl_summary}
 
-        output = response.output_text.strip()
-
-        if not output:
-            return {
-                "status": "error",
-                "output": "",
-                "message": "LLM returned an empty response.",
-            }
-
+        Your directives:
+        1. Answer their specific question directly, conversationally, and expert-level like an oceanographer.
+        2. If they ask about fishing viability or where fish will be, evaluate the Chlorophyll-a levels (1.0 to 3.0 mg/m³ indicates a highly productive Potential Fishing Zone; over 3.0 indicates harmful algal bloom risk; below 1.0 is low productivity).
+        3. If they ask about safety, evaluate temperature extremes and bloom risks.
+        4. Keep your answer professional, engaging, and concise (3-4 sentences max), grounding all advice strictly in the provided telemetry data. Avoid rigid bullet points or markdown templates.
+        """
+        
+        response = model.generate_content(prompt)
+        output_text = response.text.strip()
+        
         return {
             "status": "success",
-            "output": output,
-            "model": OPENAI_MODEL,
+            "output": output_text
         }
-
-    except Exception as exc:
+        
+    except Exception as e:
         return {
             "status": "error",
-            "output": "",
-            "message": str(exc),
-            "model": OPENAI_MODEL,
+            "output": f"LLM advisory generation failed: {str(e)}"
         }
-    
